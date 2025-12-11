@@ -5,4 +5,4 @@
 
 
 
-python main.py text.txt --hyphen --lang=mn_MN
+python main.py text.txt 20 --hyphen --lang=mn_MN  
