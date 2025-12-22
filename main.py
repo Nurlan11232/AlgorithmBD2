@@ -1,3 +1,4 @@
+#python main.py text.txt 80 --hyphen --lang mn_MN
 from __future__ import annotations
 import sys
 import argparse
@@ -29,7 +30,6 @@ class Word:
 
     def __repr__(self):
         return f"<{self.text}>"
-
 def prepare_words(text: str, lang: str, use_hyphen: bool = True) -> List[Word]:
     raw_words = text.split()
     hy = get_hyphen(lang) if use_hyphen else None
@@ -43,25 +43,23 @@ def prepare_words(text: str, lang: str, use_hyphen: bool = True) -> List[Word]:
             out.append(Word(w, parts, i))
     return out
 
+
 def justify_line(words_str: List[str], width: int, last_line=False) -> str:
     if last_line or len(words_str) == 1:
         line = " ".join(words_str)
         return line + " " * (max(0, width - len(line)))
     total_chars = sum(len(w) for w in words_str)
-    spaces_needed = width - total_chars
+    total_spaces = width - total_chars
     gaps = len(words_str) - 1
-    if gaps == 0:
-        return words_str[0] + " " * (width - len(words_str[0]))
-    base = spaces_needed // gaps
-    extra = spaces_needed % gaps
+
     out = []
     for i, w in enumerate(words_str):
         out.append(w)
         if i < gaps:
-            out.append(" " * (base + (1 if i < extra else 0)))
+            num_spaces = (total_spaces * (i + 1) // gaps) - (total_spaces * i // gaps)
+            out.append(" " * num_spaces)
     return "".join(out)
 
-# --- Greedy алгоритм ---
 def greedy(words_in: List[Word], width: int) -> List[str]:
     words = [Word(w.text, w.parts.copy(), w.idx) for w in words_in]
     lines = []
@@ -106,7 +104,6 @@ def dp_iterative(words: List[Word], width: int) -> List[str]:
     dp_cost: Dict[Tuple[int, int], float] = {}
     dp_path: Dict[Tuple[int, int], Tuple[int, int, List[str]]] = {}
     dp_cost[(N, 0)] = 0
-
     for i in range(N - 1, -1, -1):
         num_parts = len(words[i].parts)
         for p in range(num_parts - 1, -1, -1):
@@ -196,7 +193,6 @@ def dp_iterative(words: List[Word], width: int) -> List[str]:
         lines.append(formatted)
         curr = next_s
     return lines
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help="input text file")
